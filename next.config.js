@@ -2,6 +2,16 @@
 const nextConfig = {
   compress: true,
 
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "portal.elitedigitalagency.net",
+        pathname: "/storage/**",
+      },
+    ],
+  },
+
   async headers() {
     return [
       {
