@@ -134,8 +134,8 @@ export default function ContactForm() {
     // Build the request body
     // API expects snake_case keys, our form state uses camelCase → map them here
     const body = {
-      first_name: form.firstName,
-      last_name:  form.lastName,
+      firstName: form.firstName,
+      lastName:  form.lastName,
       email:      form.email,
       phone:      form.phone     || undefined,  // omit empty optional fields
       company:    form.company   || undefined,
