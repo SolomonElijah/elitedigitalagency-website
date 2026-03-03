@@ -96,7 +96,7 @@ export default function Footer() {
           © {new Date().getFullYear()} Elite Digital Agency. All rights reserved.
         </p>
         <p className="text-xs text-white/25">
-          Crafted with precision &amp; purpose.
+          Powered by  Elitebyte Hosting Technologies. 
         </p>
       </div>
     </footer>

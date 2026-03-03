@@ -50,9 +50,9 @@ const services = [
 
 // ─── CONTACT INFO ─────────────────────────────────────────────────────────────
 const contactInfo = [
-  { icon: Mail,   label: "Email Us",       value: "info@elitedigitalagency.com", sub: "We reply within 24 hours",             href: "mailto:info@elitedigitalagency.com" },
+  { icon: Mail,   label: "Email Us",       value: "info@elitedigitalagency.net", sub: "We reply within 1 hour",             href: "mailto:info@elitedigitalagency.net" },
   { icon: Phone,  label: "Call Us",        value: "+2347081087376",              sub: "Mon–Fri, 9AM–6PM WAT",                 href: "tel:+2347081087376" },
-  { icon: MapPin, label: "Visit Us",       value: "1st Powerline, Auchi",        sub: "Edo State, Nigeria",                   href: "#" },
+  { icon: MapPin, label: "Visit Us",       value: "1st Powerline, Auchi or Akesan Lagos",        sub: "Edo State, Nigeria or Lagos State Nigeria",                   href: "#" },
   { icon: Clock,  label: "Working Hours",  value: "Mon – Fri: 9AM – 6PM",        sub: "Sat: 10AM – 2PM (by appointment)",     href: "#" },
 ];
 
@@ -250,7 +250,7 @@ export default function ContactForm() {
               <div className="mt-8 flex items-center gap-3 bg-accent/5 border border-accent/15 rounded-2xl px-5 py-4">
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse flex-shrink-0" />
                 <p className="text-white/60 text-xs leading-relaxed">
-                  <span className="text-accent font-semibold">Average response time: 4 hours.</span>{" "}
+                  <span className="text-accent font-semibold">Average response time: 1 hours.</span>{" "}
                   We&apos;re quick — because your time matters.
                 </p>
               </div>
