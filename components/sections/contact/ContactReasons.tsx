@@ -8,7 +8,7 @@ const reasons = [
   {
     icon: Zap,
     title: "Fast Response",
-    desc: "We reply to every inquiry within 4 hours on business days. You'll never be left waiting to hear back from us.",
+    desc: "We reply to every inquiry within 1 hours on business days. You'll never be left waiting to hear back from us.",
     color: "accent",
   },
   {

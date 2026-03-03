@@ -1,9 +1,43 @@
 "use client";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ContactForm.tsx
+// Handles the contact form on the /contact page.
+//
+// On submit → POST https://portal.elitedigitalagency.net/api/v1/contact
+//
+// Request body sent to the API:
+// {
+//   "first_name":  string,
+//   "last_name":   string,
+//   "email":       string,
+//   "phone":       string  (optional),
+//   "company":     string  (optional),
+//   "service":     string,
+//   "budget":      string  (optional),
+//   "message":     string
+// }
+//
+// Success response the API returns:
+// { "success": true, "message": "..." }
+//
+// Error response the API returns:
+// { "success": false, "message": "...", "errors": { field: [messages] } }
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, ArrowRight, CheckCircle2, Linkedin, Twitter, Instagram, Facebook } from "lucide-react";
+import {
+  Mail, Phone, MapPin, Clock,
+  ArrowRight, CheckCircle2,
+  Linkedin, Twitter, Instagram, Facebook,
+  AlertCircle,
+} from "lucide-react";
 import FadeUp from "@/components/ui/FadeUp";
 
+// ─── API ENDPOINT ─────────────────────────────────────────────────────────────
+const CONTACT_API = "https://portal.elitedigitalagency.net/api/v1/contact";
+
+// ─── SERVICES LIST ────────────────────────────────────────────────────────────
 const services = [
   "Web Development",
   "Mobile App Development",
@@ -14,81 +48,158 @@ const services = [
   "Other / Not Sure Yet",
 ];
 
-const budgets = [
-  "Under $1,000",
-  "$1,000 – $5,000",
-  "$5,000 – $15,000",
-  "$15,000 – $50,000",
-  "$50,000+",
-  "Let&apos;s discuss",
-];
-
+// ─── CONTACT INFO ─────────────────────────────────────────────────────────────
 const contactInfo = [
-  {
-    icon: Mail,
-    label: "Email Us",
-    value: "info@elitedigitalagency.com",
-    sub: "We reply within 24 hours",
-    href: "mailto:info@elitedigitalagency.com",
-  },
-  {
-    icon: Phone,
-    label: "Call Us",
-    value: "+2347081087376",
-    sub: "Mon–Fri, 9AM–6PM WAT",
-    href: "tel:+2347081087376",
-  },
-  {
-    icon: MapPin,
-    label: "Visit Us",
-    value: "1st powerline, Auchi Edo State",
-    sub: "Auchi, Edo State, Nigeria",
-    href: "#",
-  },
-  {
-    icon: Clock,
-    label: "Working Hours",
-    value: "Mon – Fri: 9AM – 6PM",
-    sub: "Sat: 10AM – 2PM (by appointment)",
-    href: "#",
-  },
+  { icon: Mail,   label: "Email Us",       value: "info@elitedigitalagency.com", sub: "We reply within 24 hours",             href: "mailto:info@elitedigitalagency.com" },
+  { icon: Phone,  label: "Call Us",        value: "+2347081087376",              sub: "Mon–Fri, 9AM–6PM WAT",                 href: "tel:+2347081087376" },
+  { icon: MapPin, label: "Visit Us",       value: "1st Powerline, Auchi",        sub: "Edo State, Nigeria",                   href: "#" },
+  { icon: Clock,  label: "Working Hours",  value: "Mon – Fri: 9AM – 6PM",        sub: "Sat: 10AM – 2PM (by appointment)",     href: "#" },
 ];
 
+// ─── SOCIAL LINKS ─────────────────────────────────────────────────────────────
 const socials = [
-  { icon: Linkedin,  href: "#", label: "LinkedIn" },
-  { icon: Twitter,   href: "#", label: "Twitter" },
+  { icon: Linkedin,  href: "#", label: "LinkedIn"  },
+  { icon: Twitter,   href: "#", label: "Twitter"   },
   { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Facebook,  href: "#", label: "Facebook" },
+  { icon: Facebook,  href: "#", label: "Facebook"  },
 ];
 
+// ─── FORM FIELD TYPE ──────────────────────────────────────────────────────────
+// Typed so TypeScript can catch any typo in field names
+interface FormFields {
+  firstName: string;
+  lastName:  string;
+  email:     string;
+  phone:     string;
+  company:   string;
+  service:   string;
+  budget:    string;
+  message:   string;
+}
+
+// ─── EMPTY FORM STATE ─────────────────────────────────────────────────────────
+const EMPTY_FORM: FormFields = {
+  firstName: "", lastName: "",
+  email: "",    phone: "",
+  company: "",  service: "",
+  budget: "",   message: "",
+};
+
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function ContactForm() {
+
+  // Form field values
+  const [form, setForm] = useState<FormFields>(EMPTY_FORM);
+
+  // true while the API request is in flight
+  const [loading, setLoading] = useState(false);
+
+  // true after a successful API response — shows the success screen
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading]     = useState(false);
-  const [form, setForm] = useState({
-    firstName: "", lastName: "", email: "",
-    phone: "", company: "", service: "",
-    budget: "", message: "",
-  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  // Holds an error message string if the API call fails
+  // null means no error to show
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  // Holds field-level validation errors returned by the API
+  // e.g. { email: ["The email field is required."] }
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+
+  // ── Handle any input / textarea / select change ──────────────────────────
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    // Clear field-level error for this field as user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+
+  // ── Handle form submit ────────────────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();      // prevent browser default page reload
     setLoading(true);
-    setTimeout(() => {
+    setApiError(null);       // clear any previous error
+    setFieldErrors({});      // clear field errors
+
+    // Build the request body
+    // API expects snake_case keys, our form state uses camelCase → map them here
+    const body = {
+      first_name: form.firstName,
+      last_name:  form.lastName,
+      email:      form.email,
+      phone:      form.phone     || undefined,  // omit empty optional fields
+      company:    form.company   || undefined,
+      service:    form.service,
+      budget:     form.budget    || undefined,
+      message:    form.message,
+    };
+
+    try {
+      const res = await fetch(CONTACT_API, {
+        method:  "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept":        "application/json",
+        },
+        body:   JSON.stringify(body),
+        signal: AbortSignal.timeout(15000), // 15s timeout
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // ── SUCCESS ──────────────────────────────────────────────────────
+        // API returned 200 + { success: true }
+        setSubmitted(true);
+
+      } else if (res.status === 422) {
+        // ── VALIDATION ERROR ──────────────────────────────────────────────
+        // API returned 422 Unprocessable Entity with field errors
+        // e.g. { success: false, errors: { email: ["Invalid email."] } }
+        setFieldErrors(data.errors ?? {});
+        setApiError(data.message ?? "Please fix the errors below.");
+
+      } else {
+        // ── OTHER SERVER ERROR ────────────────────────────────────────────
+        // API returned some other error (500, 503, etc.)
+        setApiError(data.message ?? "Something went wrong. Please try again.");
+      }
+
+    } catch (err) {
+      // ── NETWORK ERROR ─────────────────────────────────────────────────
+      // Fetch itself failed — no internet, timeout, server unreachable
+      console.error("[ContactForm] Network error:", err);
+      setApiError("Could not reach the server. Please check your connection and try again.");
+    } finally {
+      // Always turn off the loading spinner when done, success or failure
       setLoading(false);
-      setSubmitted(true);
-    }, 1500);
+    }
   };
 
+
+  // ── Helper: get first error message for a field (or null) ────────────────
+  // Used to show red error text under each input
+  const fieldError = (name: string): string | null =>
+    fieldErrors[name]?.[0] ?? null;
+
+
+  // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
     <section className="section-padding bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-[1fr_1.5fr] gap-12 xl:gap-20 items-start">
 
-          {/* ── Left: contact info ── */}
+          {/* ── LEFT: contact info panel ──────────────────────────────── */}
           <FadeUp>
             <div>
               <h2 className="font-syne font-extrabold text-white text-2xl sm:text-3xl leading-tight mb-2">
@@ -98,7 +209,7 @@ export default function ContactForm() {
                 Whether you have a clear brief or just an early idea — reach out. We&apos;ll help you figure out the right path forward.
               </p>
 
-              {/* Contact items */}
+              {/* Contact detail cards */}
               <div className="space-y-4 mb-10">
                 {contactInfo.map(({ icon: Icon, label, value, sub, href }) => (
                   <a
@@ -118,7 +229,7 @@ export default function ContactForm() {
                 ))}
               </div>
 
-              {/* Socials */}
+              {/* Social icons */}
               <div>
                 <p className="text-white/25 text-xs uppercase tracking-wider mb-3">Follow Us</p>
                 <div className="flex gap-3">
@@ -146,11 +257,12 @@ export default function ContactForm() {
             </div>
           </FadeUp>
 
-          {/* ── Right: form ── */}
+
+          {/* ── RIGHT: the form card ───────────────────────────────────── */}
           <FadeUp delay={0.15}>
             <div className="bg-black border border-white/[0.08] rounded-3xl p-7 sm:p-10">
 
-              {/* Success state */}
+              {/* ── SUCCESS SCREEN (replaces form after submission) ── */}
               {submitted ? (
                 <div className="flex flex-col items-center justify-center text-center py-12 gap-4">
                   <div className="w-16 h-16 rounded-full bg-accent/15 border border-accent/25 flex items-center justify-center mb-2">
@@ -160,21 +272,37 @@ export default function ContactForm() {
                   <p className="text-white/45 text-sm max-w-xs leading-relaxed">
                     Thanks for reaching out. We&apos;ll review your message and get back to you within 24 hours.
                   </p>
+                  {/* Let the user send another message */}
                   <button
-                    onClick={() => { setSubmitted(false); setForm({ firstName: "", lastName: "", email: "", phone: "", company: "", service: "", budget: "", message: "" }); }}
+                    onClick={() => { setSubmitted(false); setForm(EMPTY_FORM); }}
                     className="mt-4 text-accent text-sm font-syne font-semibold hover:underline"
                   >
                     Send another message
                   </button>
                 </div>
+
               ) : (
+                /* ── FORM ─────────────────────────────────────────────── */
                 <>
-                  <h3 className="font-syne font-extrabold text-white text-xl sm:text-2xl mb-1">Send Us a Message</h3>
-                  <p className="text-white/35 text-xs mb-7">Fill in the details below and we&apos;ll be in touch shortly.</p>
+                  <h3 className="font-syne font-extrabold text-white text-xl sm:text-2xl mb-1">
+                    Send Us a Message
+                  </h3>
+                  <p className="text-white/35 text-xs mb-7">
+                    Fill in the details below and we&apos;ll be in touch shortly.
+                  </p>
+
+                  {/* ── TOP-LEVEL API ERROR BANNER ────────────────────── */}
+                  {/* Only shows when there's a non-field-specific error */}
+                  {apiError && (
+                    <div className="mb-5 flex items-start gap-3 bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3.5">
+                      <AlertCircle size={15} className="text-red-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-red-400 text-xs leading-relaxed">{apiError}</p>
+                    </div>
+                  )}
 
                   <form onSubmit={handleSubmit} className="space-y-4">
 
-                    {/* Name row */}
+                    {/* ── First + Last Name ──────────────────────────── */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
@@ -184,8 +312,13 @@ export default function ContactForm() {
                           type="text" name="firstName" required
                           value={form.firstName} onChange={handleChange}
                           placeholder="John"
-                          className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:ring-0 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200"
+                          className={`w-full bg-white/[0.04] border focus:ring-0 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200
+                            ${fieldError("first_name") ? "border-red-500/50" : "border-white/[0.08] focus:border-accent/40"}`}
                         />
+                        {/* Field-level error from API */}
+                        {fieldError("first_name") && (
+                          <p className="text-red-400 text-[0.68rem] mt-1">{fieldError("first_name")}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
@@ -195,12 +328,16 @@ export default function ContactForm() {
                           type="text" name="lastName" required
                           value={form.lastName} onChange={handleChange}
                           placeholder="Doe"
-                          className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200"
+                          className={`w-full bg-white/[0.04] border focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200
+                            ${fieldError("last_name") ? "border-red-500/50" : "border-white/[0.08] focus:border-accent/40"}`}
                         />
+                        {fieldError("last_name") && (
+                          <p className="text-red-400 text-[0.68rem] mt-1">{fieldError("last_name")}</p>
+                        )}
                       </div>
                     </div>
 
-                    {/* Email + Phone */}
+                    {/* ── Email + Phone ──────────────────────────────── */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
@@ -210,8 +347,12 @@ export default function ContactForm() {
                           type="email" name="email" required
                           value={form.email} onChange={handleChange}
                           placeholder="john@company.com"
-                          className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200"
+                          className={`w-full bg-white/[0.04] border focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200
+                            ${fieldError("email") ? "border-red-500/50" : "border-white/[0.08] focus:border-accent/40"}`}
                         />
+                        {fieldError("email") && (
+                          <p className="text-red-400 text-[0.68rem] mt-1">{fieldError("email")}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
@@ -220,13 +361,13 @@ export default function ContactForm() {
                         <input
                           type="tel" name="phone"
                           value={form.phone} onChange={handleChange}
-                          placeholder="+1 555 000 0000"
+                          placeholder="+234 700 000 0000"
                           className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200"
                         />
                       </div>
                     </div>
 
-                    {/* Company */}
+                    {/* ── Company ───────────────────────────────────── */}
                     <div>
                       <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
                         Company / Organisation
@@ -239,7 +380,7 @@ export default function ContactForm() {
                       />
                     </div>
 
-                    {/* Service + Budget */}
+                    {/* ── Service + Budget ──────────────────────────── */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
@@ -248,7 +389,8 @@ export default function ContactForm() {
                         <select
                           name="service" required
                           value={form.service} onChange={handleChange}
-                          className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-sm transition-colors duration-200 appearance-none"
+                          className={`w-full bg-white/[0.04] border focus:outline-none rounded-xl px-4 py-3 text-sm transition-colors duration-200 appearance-none
+                            ${fieldError("service") ? "border-red-500/50" : "border-white/[0.08] focus:border-accent/40"}`}
                           style={{ color: form.service ? "#f5f5f0" : "rgba(245,245,240,0.2)" }}
                         >
                           <option value="" disabled>Select a service</option>
@@ -256,26 +398,24 @@ export default function ContactForm() {
                             <option key={s} value={s} style={{ background: "#111120", color: "#f5f5f0" }}>{s}</option>
                           ))}
                         </select>
+                        {fieldError("service") && (
+                          <p className="text-red-400 text-[0.68rem] mt-1">{fieldError("service")}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
                           Budget Range
                         </label>
-                        <select
-                          name="budget"
+                        <input
+                          type="text" name="budget"
                           value={form.budget} onChange={handleChange}
-                          className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-sm transition-colors duration-200 appearance-none"
-                          style={{ color: form.budget ? "#f5f5f0" : "rgba(245,245,240,0.2)" }}
-                        >
-                          <option value="" disabled>Select budget</option>
-                          {budgets.map((b) => (
-                            <option key={b} value={b} style={{ background: "#111120", color: "#f5f5f0" }}>{b}</option>
-                          ))}
-                        </select>
+                          placeholder="e.g. $500 – $2,000"
+                          className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200"
+                        />
                       </div>
                     </div>
 
-                    {/* Message */}
+                    {/* ── Message ───────────────────────────────────── */}
                     <div>
                       <label className="block text-white/40 text-xs font-syne font-medium mb-1.5 uppercase tracking-wide">
                         Message <span className="text-accent">*</span>
@@ -284,17 +424,22 @@ export default function ContactForm() {
                         name="message" required rows={5}
                         value={form.message} onChange={handleChange}
                         placeholder="Tell us about your project — what you're building, your goals, timeline, and any specific requirements..."
-                        className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-accent/40 focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200 resize-none"
+                        className={`w-full bg-white/[0.04] border focus:outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-200 resize-none
+                          ${fieldError("message") ? "border-red-500/50" : "border-white/[0.08] focus:border-accent/40"}`}
                       />
+                      {fieldError("message") && (
+                        <p className="text-red-400 text-[0.68rem] mt-1">{fieldError("message")}</p>
+                      )}
                     </div>
 
-                    {/* Submit */}
+                    {/* ── Submit button ─────────────────────────────── */}
                     <button
                       type="submit"
                       disabled={loading}
                       className="w-full flex items-center justify-center gap-2 bg-accent text-black font-syne font-bold text-sm py-3.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,229,176,0.4)] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-h-[48px]"
                     >
                       {loading ? (
+                        /* Spinner shown while API call is in flight */
                         <span className="flex items-center gap-2">
                           <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
@@ -315,6 +460,7 @@ export default function ContactForm() {
               )}
             </div>
           </FadeUp>
+
         </div>
       </div>
     </section>

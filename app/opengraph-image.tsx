@@ -111,7 +111,7 @@ export default async function Image() {
           position: "absolute", bottom: 64, right: 80,
           color: "rgba(245,245,240,0.25)", fontSize: 14, letterSpacing: "0.05em",
         }}>
-          elitedigitalagency.com
+          elitedigitalagency.net
         </div>
       </div>
     ),

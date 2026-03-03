@@ -8,15 +8,15 @@ const team = [
   {
     name: "Solomon Elijah",
     role: "CEO & Founder",
-    bio: "10+ years in digital strategy. Passionate about building solutions that create real-world impact.",
+    bio: "8+ years in digital strategy. Passionate about building solutions that create real-world impact.",
     initials: "SE",
     gradient: "from-accent/30 to-violet/30",
   },
   {
-    name: "Sarah Adebayo",
-    role: "CTO",
+    name: "Akinyele Odunayo",
+    role: "Fullstack Developer",
     bio: "Full-stack architect with a love for scalable systems and clean, purposeful code.",
-    initials: "SA",
+    initials: "AO",
     gradient: "from-violet/30 to-accent/20",
   },
   {

@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/_next/", "/admin/"],
       },
     ],
-    sitemap: "https://www.elitedigitalagency.com/sitemap.xml",
-    host: "https://www.elitedigitalagency.com",
+    sitemap: "https://www.elitedigitalagency.net/sitemap.xml",
+    host: "https://www.elitedigitalagency.net",
   };
 }
