@@ -1,40 +1,8 @@
-import { MetadataRoute } from "next";
-
-const BASE_URL = "https://www.elitedigitalagency.net";
+import type { MetadataRoute } from "next";
+import { site } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
-  return [
-    {
-      url: BASE_URL,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/services`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/projects`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/contact`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.7,
-    },
-  ];
+  return ["/", "/services", "/projects", "/about", "/hosting", "/contact"].map((path) => ({
+    url: new URL(path, site.url).href,
+  }));
 }

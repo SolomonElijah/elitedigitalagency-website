@@ -1,103 +1,41 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, Linkedin, Twitter, Instagram, Facebook } from "lucide-react";
-
-const footerLinks = {
-  Company:  [
-    { label: "Home",     href: "/" },
-    { label: "About Us", href: "/about" },
-    { label: "Projects", href: "/projects" },
-    { label: "Contact",  href: "/contact" },
-  ],
-  Services: [
-    { label: "Web Development",    href: "/services" },
-    { label: "Mobile Apps",        href: "/services" },
-    { label: "Digital Marketing",  href: "/services" },
-    { label: "IT Training",        href: "/services" },
-    { label: "IT Consulting",      href: "/services" },
-  ],
-};
-
-const socials = [
-  { icon: Linkedin,  href: "#", label: "LinkedIn" },
-  { icon: Twitter,   href: "#", label: "Twitter" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Facebook,  href: "#", label: "Facebook" },
-];
+import { ArrowUpRight } from "lucide-react";
+import Brand from "./Brand";
+import { hosting, site } from "@/lib/site";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0c0c18] border-t border-white/[0.06]">
-      {/* Main grid */}
-      <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-
-        {/* Brand column */}
-        <div className="lg:col-span-1">
-          <Link href="/" className="font-syne font-extrabold text-xl text-white tracking-tight">
-            Elite<span className="text-accent"> Digital</span> Agency
-          </Link>
-          <p className="mt-4 text-sm text-white/40 leading-relaxed max-w-xs">
-            Transforming visions into powerful digital experiences — from code to campaigns.
-          </p>
-          <div className="flex gap-3 mt-6">
-            {socials.map(({ icon: Icon, href, label }) => (
-              <a
-                key={label}
-                href={href}
-                aria-label={label}
-                className="w-9 h-9 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-accent hover:border-accent/30 hover:bg-accent/5 transition-all duration-200"
-              >
-                <Icon size={15} />
-              </a>
-            ))}
+    <footer className="site-footer">
+      <div className="shell">
+        <div className="footer-grid">
+          <div>
+            <Brand />
+            <p className="footer-description">Software development and digital services for businesses in Nigeria and beyond.</p>
+          </div>
+          <div className="footer-links">
+            <h2>Explore</h2>
+            <Link href="/services">Services</Link>
+            <Link href="/projects">Work</Link>
+            <Link href="/about">About</Link>
+            <Link href="/contact">Contact</Link>
+          </div>
+          <div className="footer-links">
+            <h2>Get in touch</h2>
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+            <a href={`tel:${site.phone}`}>{site.phoneLabel}</a>
+            <span>Auchi & Lagos, Nigeria</span>
+          </div>
+          <div className="footer-links">
+            <h2>Our hosting brand</h2>
+            <Link href="/hosting">About {hosting.name}</Link>
+            <a href={hosting.website}>Hosting plans <ArrowUpRight size={14} aria-hidden="true" /></a>
+            <a href={hosting.account}>Client area <ArrowUpRight size={14} aria-hidden="true" /></a>
           </div>
         </div>
-
-        {/* Nav columns */}
-        {Object.entries(footerLinks).map(([heading, links]) => (
-          <div key={heading}>
-            <h4 className="font-syne font-bold text-sm text-white mb-5 tracking-wide">{heading}</h4>
-            <ul className="space-y-3">
-              {links.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/40 hover:text-accent transition-colors duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-
-        {/* Contact column */}
-        <div>
-          <h4 className="font-syne font-bold text-sm text-white mb-5 tracking-wide">Contact</h4>
-          <ul className="space-y-3">
-            {[
-              { icon: Mail,    text: "info@elitedigitalagency.net" },
-              { icon: Phone,   text: "+2347081087376" },
-              { icon: MapPin,  text: "1st powerline, Auchi Edo State" },
-              { icon: MapPin,  text: "akesan Lagos" },
-            ].map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-start gap-2.5 text-sm text-white/40">
-                <Icon size={14} className="mt-0.5 flex-shrink-0 text-accent/70" />
-                {text}
-              </li>
-            ))}
-          </ul>
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} Elite Digital Agency</p>
+          <a href="#main-content">Back to top ↑</a>
         </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="border-t border-white/[0.06] max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row justify-between items-center gap-3">
-        <p className="text-xs text-white/25">
-          © {new Date().getFullYear()} Elite Digital Agency. All rights reserved.
-        </p>
-        <p className="text-xs text-white/25">
-          Powered by  Elitebyte Hosting Technologies. 
-        </p>
       </div>
     </footer>
   );

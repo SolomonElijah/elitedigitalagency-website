@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import ProjectsHero from "@/components/sections/projects/ProjectsHero";
+import PageIntro from "@/components/ui/PageIntro";
 import ProjectsGrid from "@/components/sections/projects/ProjectsGrid";
-import ProjectsResults from "@/components/sections/projects/ProjectsResults";
-import ProjectsTestimonials from "@/components/sections/projects/ProjectsTestimonials";
-import ProjectsCTA from "@/components/sections/projects/ProjectsCTA";
+import CTASection from "@/components/sections/CTASection";
 
 export const metadata: Metadata = {
-  title: "Projects — Elite Digital Agency",
-  description:
-    "Browse our portfolio of 200+ delivered projects — websites, mobile apps, digital marketing campaigns, and IT training programs across 15+ industries.",
+  title: "Projects",
+  description: "Explore websites and mobile apps built by Elite Digital Agency.",
+  alternates: { canonical: "/projects" },
 };
 
 export default function ProjectsPage() {
   return (
     <>
-      <ProjectsHero />
-      <ProjectsGrid />
-      <ProjectsResults />
-      <ProjectsTestimonials />
-      <ProjectsCTA />
+      <PageIntro label="Our work" title="Web platforms and apps we’ve built." description="Browse our client work, from an automotive platform in Abuja to a mobile commerce app." />
+      <section className="section projects-section" aria-label="Project portfolio">
+        <div className="shell">
+          <ProjectsGrid />
+        </div>
+      </section>
+      <CTASection />
     </>
   );
 }
