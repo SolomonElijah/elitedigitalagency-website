@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, MapPin } from "lucide-react";
+import { site } from "@/lib/site";
 
 const links = [
   { label: "Product engineering", detail: "Web, mobile & custom software", href: "/services#web-development" },
@@ -14,7 +15,7 @@ export default function HeroSection() {
       <div className="hero-stage">
         <div className="shell">
           <div className="hero-copy">
-            <p className="eyebrow">Software development company</p>
+            <p className="eyebrow">Software development company · {site.cac}</p>
             <h1 id="hero-heading">We build the software <em>your business runs on.</em></h1>
             <p className="hero-description">We design and build websites, mobile apps, desktop apps, custom APIs, and internal tools for businesses across Nigeria.</p>
             <div className="actions">

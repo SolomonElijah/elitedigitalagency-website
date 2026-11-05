@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import PageIntro from "@/components/ui/PageIntro";
 import ContactForm from "@/components/sections/contact/ContactForm";
 import { services } from "@/lib/services";
@@ -27,6 +27,7 @@ export default function ContactPage({ searchParams }: { searchParams: { service?
               <li><Phone size={18} aria-hidden="true" /><a href={`tel:${site.phone}`}>{site.phoneLabel}</a></li>
               <li><MessageCircle size={18} aria-hidden="true" /><a href={site.whatsapp}>Chat on WhatsApp</a></li>
               <li><MapPin size={18} aria-hidden="true" />Auchi &amp; Lagos, Nigeria</li>
+              <li><ShieldCheck size={18} aria-hidden="true" />CAC: {site.cac}</li>
             </ul>
             <div className="contact-hosting">
               <h3>Need hosting support?</h3>

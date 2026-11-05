@@ -24,6 +24,7 @@ export default function Footer() {
             <a href={`mailto:${site.email}`}>{site.email}</a>
             <a href={`tel:${site.phone}`}>{site.phoneLabel}</a>
             <span>Auchi & Lagos, Nigeria</span>
+            <span>CAC: {site.cac}</span>
           </div>
           <div className="footer-links">
             <h2>Our hosting brand</h2>
@@ -33,7 +34,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Elite Digital Agency</p>
+          <p>© {new Date().getFullYear()} Elite Digital Agency • CAC: {site.cac}</p>
           <a href="#main-content">Back to top ↑</a>
         </div>
       </div>

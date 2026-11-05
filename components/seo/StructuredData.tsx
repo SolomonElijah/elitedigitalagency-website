@@ -12,6 +12,7 @@ const schema = {
       description: site.description,
       email: site.email,
       telephone: site.phone,
+      identifier: site.cac,
     },
     {
       "@type": "WebSite",
